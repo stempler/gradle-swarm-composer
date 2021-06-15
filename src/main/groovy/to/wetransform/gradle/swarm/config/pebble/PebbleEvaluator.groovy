@@ -208,6 +208,27 @@ class PebbleEvaluator implements ConfigEvaluator {
     }
   }
 
+  Collection<List<String>> getDependencies(String value) {
+    //XXX this function uses Pebble internal API
+
+    try {
+      LexerImpl lexer = new LexerImpl(engine.syntax, engine.extensionRegistry.getUnaryOperators().values(),
+        engine.extensionRegistry.getBinaryOperators().values())
+      Reader templateReader = new StringReader(value)
+      TokenStream tokenStream = lexer.tokenize(templateReader, 'dynamic')
+
+      Parser parser = new ParserImpl(engine.extensionRegistry.getUnaryOperators(),
+        engine.extensionRegistry.getBinaryOperators(), engine.extensionRegistry.getTokenParsers());
+      RootNode root = parser.parse(tokenStream)
+      def visitor = new DependencyCollectorVisitor()
+      root.accept(visitor)
+      visitor.dependencies
+    } catch (e) {
+      log.warn("Could not determine if expression is dynamic: $value", e)
+      false
+    }
+  }
+
   /**
    * Determines if there should only be one pass to evaluate this configuration value.
    */

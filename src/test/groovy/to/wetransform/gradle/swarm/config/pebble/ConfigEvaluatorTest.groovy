@@ -192,7 +192,6 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     assert evaluated == expected
   }
 
-  @Ignore
   @Test
   void testEvalConfigIfString() {
     def config = [
